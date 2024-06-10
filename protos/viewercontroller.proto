@@ -79,10 +79,20 @@ message ViewerControllerIdxResponse{
 	int32 idx = 2;
 }
 
+message ViewerControllerDisplayedIdxResponse{
+	Status status = 1;
+	int32 displayed_idx = 2;
+}
+
 message ViewerControllerWLWWResponse{
 	Status status = 1;
 	float wl = 2;
 	float ww = 3;
+}
+
+message ViewerControllerFlippedDataResponse{
+	Status status = 1;
+	bool flipped_data = 2;
 }
 
 message ViewerControllerCopyViewerWindowResponse{
@@ -136,7 +146,7 @@ message ViewerControllerNewROIRequest{
 	ViewerController viewer_controller = 1;
 	int32 itype = 2;
 	string name = 3;
-	int32 position = 4;
+	int32 idx = 4;
 	int32 movie_idx = 5;
 	int32 buffer_position_x = 6;
 	int32 buffer_position_y = 7;
@@ -173,6 +183,11 @@ message ViewerControllerIsDataVolumicRequest{
 message ViewerControllerSetIdxRequest{
 	ViewerController viewer_controller = 1;
 	int32 idx = 2;
+}
+
+message ViewerControllerSetDisplayedIdxRequest{
+	ViewerController viewer_controller = 1;
+	int32 displayed_idx = 2;
 }
 
 message ViewerControllerSetWLWWRequest{

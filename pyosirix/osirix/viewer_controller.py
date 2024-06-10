@@ -37,14 +37,48 @@ class ViewerController(osirix.base.OsirixBase):
     @idx.setter
     @pyosirix_connection_check
     def idx(self, idx: int) -> None:
-        """ The slice index currently being displayed to the viewer (starting at 0).
+        """ The data slice index currently being displayed to the viewer (starting at 0).
 
-        Note that the index displayed on the viewer is this value plus one.
+        Note that this may not be equal to the index displayed on the viewer when
+            `data_flipped` is True.
         """
         request = viewercontroller_pb2.ViewerControllerSetIdxRequest(
             viewer_controller=self.pb2_object, idx=idx)
         response = self.osirix_service_stub.ViewerControllerSetIdx(request)
         self.response_check(response)
+
+    @property
+    @pyosirix_connection_check
+    def displayed_idx(self) -> int:
+        """ The data slice index currently being displayed to the viewer (starting at 0).
+
+        Note that this may not be equal to the index displayed on the viewer when
+            `data_flipped` is True.
+        """
+        response = self.osirix_service_stub.ViewerControllerDisplayedIdx(self.pb2_object)
+        self.response_check(response)
+        return int(response.displayed_idx)
+
+    @displayed_idx.setter
+    @pyosirix_connection_check
+    def displayed_idx(self, idx: int) -> None:
+        """ The slice index currently being displayed to the viewer (starting at 0).
+
+        Note that the index displayed on the viewer is this value plus one.
+        """
+        request = viewercontroller_pb2.ViewerControllerSetDisplayedIdxRequest(
+            viewer_controller=self.pb2_object, displayed_idx=idx)
+        response = self.osirix_service_stub.ViewerControllerSetDisplayedIdx(request)
+        self.response_check(response)
+
+    @property
+    @pyosirix_connection_check
+    def flipped_data(self) -> int:
+        """ Whether the slices data are flipped in the viewer.
+        """
+        response = self.osirix_service_stub.ViewerControllerFlippedData(self.pb2_object)
+        self.response_check(response)
+        return int(response.flipped_data)
 
     @property
     @pyosirix_connection_check
@@ -346,7 +380,7 @@ class ViewerController(osirix.base.OsirixBase):
         return osirix.vr_controller.VRController(self.osirix_service, response.vr_controller)
 
     @pyosirix_connection_check
-    def new_roi(self, itype: int = 15, name: str = "", position: idx = 0, movie_idx: int = 0,
+    def new_roi(self, itype: int = 15, name: str = "", idx: int = 0, movie_idx: int = 0,
                 buffer_position_column: int = 0, buffer_position_row: int = 0,
                 color: Tuple[float, float, float] = (0, 255, 0), thickness: float = 1.0,
                 opacity: float = 1.0, buffer: NDArray = None, rect: NDArray = None,
@@ -362,7 +396,7 @@ class ViewerController(osirix.base.OsirixBase):
             itype (int): The index of the roi type (see `osirix.roi.ROI.itypes` for details).
                 Default is 15 (tPencil).
             name (str): The name of the ROI.
-            position (int): The slice index on which to create the new ROI.
+            idx (int): The slice index on which to create the new ROI.
             movie_idx (int): The frame on which to create the new ROI.
             buffer_position_column (int): The column offset of a mask ROI in pixel coordinates.
             buffer_position_row (int): The row offset of a mask ROI in pixel coordinates.
@@ -401,7 +435,7 @@ class ViewerController(osirix.base.OsirixBase):
             buffer_request = viewercontroller_pb2.ViewerControllerNewROIRequest.Buffer(
                 buffer=buffer.ravel().tolist(), rows=rows, columns=columns)
             request = viewercontroller_pb2.ViewerControllerNewROIRequest(
-                viewer_controller=self.pb2_object, position=position, movie_idx=movie_idx,
+                viewer_controller=self.pb2_object, idx=idx, movie_idx=movie_idx,
                 buffer_position_x=buffer_position_column, buffer_position_y=buffer_position_row,
                 color=color_request, opacity=opacity, name=name, buffer=buffer_request, itype=itype)
         elif itype in [6, 9, 13, 19, 31]:
@@ -417,7 +451,7 @@ class ViewerController(osirix.base.OsirixBase):
                                                                                    width=rect[2],
                                                                                    height=rect[3])
             request = viewercontroller_pb2.ViewerControllerNewROIRequest(
-                viewer_controller=self.pb2_object, position=position, movie_idx=movie_idx,
+                viewer_controller=self.pb2_object, idx=idx, movie_idx=movie_idx,
                 color=color_request, opacity=opacity, name=name, rectangle=rect_request,
                 thickness=thickness, itype=itype)
         else:
@@ -430,7 +464,7 @@ class ViewerController(osirix.base.OsirixBase):
                 viewercontroller_pb2.ViewerControllerNewROIRequest.Point2D(x=p[0], y=p[1]) for p in
                 points]
             request = viewercontroller_pb2.ViewerControllerNewROIRequest(
-                viewer_controller=self.pb2_object, position=position, movie_idx=movie_idx,
+                viewer_controller=self.pb2_object, idx=idx, movie_idx=movie_idx,
                 color=color_request, opacity=opacity, name=name, points=points_request,
                 thickness=thickness, itype=itype)
         response = self.osirix_service_stub.ViewerControllerNewROI(request)
