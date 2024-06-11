@@ -98,13 +98,15 @@ There are several core files and directories at the [root of the project](https:
 
 | Name             | Description                                                                                                                            |
 |------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| __.github__      | Issue templates and CI/CD workflows for GitHub Actions.                                                                                |
 | __cpp__          | Auto-generated C++ protobuf files (not under version control).                                                                         |
 | __docs__         | All externally-facing documentation (definition files in markdown).                                                                    |
 | __protos__       | gRPC protocol files, which need to be modified to provide additional OsiriX functionality.                                             |
+| __pyosirix__     | Source code for the pyOsiriX sub-project, including translation of all functionality into Python classes. .                            |
 | __python__       | Source code for the osirixgrpc pip project. Sub-folder `osirixgrpc` is automatically generated (not under version control).            |
 | __src__          | Source files for building the OsiriXgrpc plugin. This is also where gRPC methods are implemented.                                      |
 | __tests__        | Integration tests for the plugin and protobuf files. Note these are not automated and run manually.                                    |
-| .bumpversion.cfg | Rules to increment version numbers scattered throughout the project                                                                    |
+| .bumpversion.cfg | Rules to increment version numbers scattered throughout the project.                                                                   |
 | build.sh         | A utility shell script used to compile gRPC from source and build all protobuf files from definition (.proto) files on a host machine. |
 
 ### Modifying Source Code
@@ -116,41 +118,49 @@ efficiently reviewed and integrated:
 2. __Build the Plugin__ Before making any changes, please familiarize yourself with the [build process](#building). 
 3. __Make Your Changes__ Implement your changes in your forked repository. To facilitate a smooth review process, we 
    suggest:
-   - Isolate Changes: Keep your changes focused. Large or complex modifications may require more extensive review and 
-     have a higher chance of being rejected.
-   - Communicate Intentions: Let us know about your planned changes in advance. This helps us coordinate contributions 
-     and include them in our release planning.
+    - Isolate Changes: Keep your changes focused. Large or complex modifications may require more extensive review and 
+      have a higher chance of being rejected.
+    - Communicate Intentions: Let us know about your planned changes in advance. This helps us coordinate contributions 
+      and include them in our release planning.
 4. __Submit a Pull Request (PR)__ Once you're satisfied with your changes, submit them back to the main project via a 
    pull request. Ensure your PR targets the `dev` branch. For guidance on creating a pull request, see GitHub's 
    [documentation](https://docs.github.com/articles/creating-a-pull-request-from-a-fork) on Creating a pull request from 
    a fork. 
 5. __Review Process__ Your pull request will undergo a review by the project maintainers. During this phase:
-   - Merge Upstream Changes: You may be asked to merge changes from the upstream `dev branch into your fork to resolve 
-     any conflicts. 
-   - Version Bumping: If your changes are accepted, you'll be asked to bump the version by executing bumpversion build. 
-      This step is crucial for maintaining version control and ensuring compatibility. 
-6. Final Steps: After addressing any review comments and completing the version bump, your changes will be merged into 
+    - Merge Upstream Changes: You may be asked to merge changes from the upstream `dev` branch into your fork to resolve 
+      any conflicts. 
+    - Version Bumping: If your changes are accepted, you'll be asked to bump the version by executing bumpversion build. 
+       This step is crucial for maintaining version control and ensuring compatibility. 
+6. __Final Steps__ After addressing any review comments and completing the version bump, your changes will be merged into 
    the `dev` branch.
 
 __Additional Tips for a Successful Contribution__
- - __Follow Coding Standards__ Adhere to the coding standards and guidelines provided in the repository documentation to 
-   increase the likelihood of your changes being accepted. 
- - __Test Thoroughly__ Before submitting your pull request, thoroughly test your changes to ensure they work as expected 
-   and do not introduce any new issues.
+
+  - __Follow Coding Standards__ Adhere to the coding standards and guidelines provided in the repository documentation to 
+    increase the likelihood of your changes being accepted. 
+  - __Test Thoroughly__ Before submitting your pull request, thoroughly test your changes to ensure they work as expected 
+    and do not introduce any new issues.
 
 By following these guidelines, you can contribute valuable improvements to osirixgrpc and help enhance its 
 functionality and user experience.
 
 ### Version Control
 
-OsiriXgrpc uses semantic versioning using a traditional Gitflow scheme as illustrated in the figure below. All 
-development takes place within within the `dev` branch prior to release in the main branch. This branch exists in one of 
-two phases:
+OsiriXgrpc uses semantic versioning (`major.minor.patch-releasebuild`) using a traditional Gitflow scheme as illustrated 
+in the figure below. All development takes place within the `dev` branch prior to release in the main branch. This 
+branch exists in one of two phases:
 
 1. __Development__ phase. Each version is appended by the `_devX`, where `X` increments after each additional
   feature is merged. New features are accepted in this stage.
 2. __Release Candidate__ phase. Each version will be appended by the `_rcX`, where `X` increments after each additional
   hot-fix applied during user testing. No new features will be accepted during this phase.
+
+Once all tests are complete, the `dev` branch is merged with `main`, and the software remains a beta release for an
+incubation period of 2 months, before being fully released. During this period, only hotfixes may be made with no 
+change to the core infrastructure (i.e. nomenclature to remain consistent). This provides us with some buffer to perform 
+tests on the main branch and obtain feedback from external users.
+
+Any release with `major` = 0 means that we may make subtle changes to the technology prior to 1.0.0 (i.e. no promises!).
 
 ![OsiriXgrpc version control](../assets/osirixgrpc.drawio.svg)
 
@@ -165,7 +175,7 @@ commands available to bump2version within this project, and example increments i
   </tr>
   <tr>
     <td><code>bumpversion release</code></td>
-    <td>1.0.0-dev5 &rarr; 1.0.0-rc0 &rarr; 1.0.0</td>
+    <td>1.0.0-dev5 &rarr; 1.0.0-rc0 &rarr; 1.0.0-beta0 &rarr; 1.0.0</td>
   </tr>
   <tr>
     <td><code>bumpversion patch</code></td>
@@ -206,6 +216,7 @@ developers before being implemented.
 | docs/api                | Description files for all OsiriXgrpc client API (in Python).                         |
 | docs/assets             | Location for all figures and other supporting information not in Markdown format.    |
 | docs/contributing       | Instruction for how to contribute to the project.                                    |
+| docs/pyosirix           | Documentation for the pyOsiriX sub-package.                                          |
 | docs/getting_started.md | Core instructions on how to install and use the OsiriX plugin (e.g. user-interface). |
 | docs/README.md          | The homepage for the documentation.                                                  |
 | mkdocs.yaml             | yaml configuration file for the mkdocs build                                         | 
@@ -287,10 +298,21 @@ Google Form that checks successful completion and obtains feedback on each of th
 In addition, we will ask testers to run some automated unit tests. Automated unit testing for OsiriXgrpc presents 
 substantial challenges - this complexity arises from its dependency on symbols and functions embedded within the OsiriX 
 executable. Consequently, to maintain the quality and reliability of OsiriXgrpc, we incorporate unit testing into our 
-user tests. This approach also ensures comprehensive validation through real-world usage scenarios. These unit tests 
-will deploy an output file (`osirixgrpc_unit_tests.txt`) on the testers Desktop, which will be requested to be sent back
-to us for processing. This file will not capture any personal information, other than the versions of macOS, OsiriX,
-and OsiriXgrpc the tester has used.
+user tests. This approach also ensures comprehensive validation through real-world usage scenarios. 
+
+To run automated unit tests:
+
+1. Clone the latest [repository](https://github.com/osirixgrpc/osirixgrpc), or pull changes.
+2. Switch to the `dev` branch (`git checkout dev`).
+3. Open up OsiriX and move to or create an empty database (no Dicom studies/series displayed).
+4. Ensure that an OsiriXgrpc port `50001` is established and running (see [Getting Started](../getting_started.md#server-configuration))
+5. Change directory to `tests` (`cd tests` from the main repository).
+6. Run the shell script: `bash run_tests.sh`
+
+Please wait while OsiriX runs through all the tests (many screen will open and close). The shell script will indicate 
+testing is complete. Unit tests will save results to an output directory on your Desktop `osirixgrpc_tests`. Please
+zip this folder and [send it to us](#contact). Contained files do not capture any personal information, other than the 
+versions of macOS, OsiriX, and OsiriXgrpc.
 
 ## Feature Requests
 
@@ -304,7 +326,7 @@ available within the OsiriX application itself.
 
 If you wish request new features, please use our 
 <a href="https://github.com/osirixgrpc/osirixgrpc/issues"> issue tracker</a> ensuring that you use a `feature request` 
-label, using the feature request issue template.  This includes the following information
+label, using the `feature_request` issue template.  This includes the following information
 <ul>
   <li>To which aspect of OsiriXgrpc is the feature request intended?</li>
   <li>Short description of the new functionality</li>
@@ -317,10 +339,12 @@ label, using the feature request issue template.  This includes the following in
 ## Issues
 Please use the relevant label for each issue that you submit on the GitHub project.
 
-| Label           | Description                                                                                                                           |
-|-----------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| Bug             | If you encounter a bug then please let us know using the provided template. See [Bug Reporting](#bug-reporting) for more information. |
-| Feature Request | 
+| Label             | Description                                                                                                                                           |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `bug`             | If you encounter a bug then please let us know using the provided template. See [Bug Reporting](#bug-reporting) for more information.                 |
+| `feature_request` | What else would you like see from OsiriXgrpc? Is there any functionality in OsiriX that you think warrant exposure through API?                       |
+| `documentation`   | Tell us how we can improve our [documentation](#documentation). This includes everything from fixing spelling mistakes to improving interpretability. |
+| `generic`         | Any other issue you have with OsiriXgrpc.                                                                                                             |
 
 
 ## Contact
